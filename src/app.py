@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request
 from linebot.models import *
 from linebot import *
@@ -5,6 +6,7 @@ import json
 import requests
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY')
 
 line_bot_api = LineBotApi(
     'b5jEOAKs0FHY3MkC1fBn/ghTXv0uJBNYDF4ae7FVoGA0OkMhXa3fRSMVEqGiCjArgHXvcUh0KN5P2u+eOn+6dBVt4gwGYRsx6+kwxg2qhjO0GXG8x+9xvNRNt475r91YmgJQCU4aEB1bHrLf2LeMigdB04t89/1O/w1cDnyilFU=')

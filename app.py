@@ -4,6 +4,8 @@ from linebot.models import *
 from linebot import *
 import json
 import requests
+import geopy.distance as ps
+import numpy as np
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
@@ -65,6 +67,53 @@ def reply(intent, text, reply_token, id, disname):
         print(message)
         text_message = TextSendMessage(text=message)
         line_bot_api.reply_message(reply_token, text_message)
+
+
+def getdistace(latitude, longitude, cdat):
+    coords_1 = (float(latitude), float(longitude))
+    # create list of all reference locations from a pandas DataFrame
+    latlngList = cdat[['Latitude', 'Longitude']].values
+    # loop and calculate distance in KM using geopy.distance library and append to distance list
+    kmsumList = []
+    for latlng in latlngList:
+        coords_2 = (float(latlng[0]), float(latlng[1]))
+        kmsumList.append(ps.vincenty(coords_1, coords_2).km)
+        return kmsumList
+
+
+def event_handle(event):
+    print(event)
+    try:
+        userId = event['source']['userId']
+    except:
+        print('error cannot get userId')
+        return ''
+
+    try:
+        rtoken = event['replyToken']
+    except:
+        print('error cannot get rtoken')
+        return ''
+    try:
+        msgId = event["message"]["id"]
+        msgType = event["message"]["type"]
+    except:
+        print('error cannot get msgID, and msgType')
+        sk_id = np.random.randint(1, 17)
+        replyObj = StickerSendMessage(package_id=str(1), sticker_id=str(sk_id))
+        line_bot_api.reply_message(rtoken, replyObj)
+        return ''
+
+    if msgType == "text":
+        msg = str(event["message"]["text"])
+        replyObj = TextSendMessage(text=msg)
+        line_bot_api.reply_message(rtoken, replyObj)
+
+    else:
+        sk_id = np.random.randint(1, 17)
+        replyObj = StickerSendMessage(package_id=str(1), sticker_id=str(sk_id))
+        line_bot_api.reply_message(rtoken, replyObj)
+    return ''
 
 
 @handler.add(MessageEvent, message=TextMessage)

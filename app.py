@@ -45,21 +45,25 @@ def reply(intent, text, reply_token, id, disname):
         line_bot_api.reply_message(reply_token, text_message)
 
     elif intent == 'findlocation':
-        data = requests.get(
-            'https://blockage.crflood.com/api/blockage/ฝาง/เวียง')
-        print(data)
-        print(data.content)
+        str = text.split()
+        amp = str[0]
+        tambol = str[1]
+        data = requests.get('https://blockage.crflood.com/api/blockage/{}/{}'.format(amp, tambol))
         json_data = json.loads(data.text)
-
-        for i in range(0, len(json_data)):
-
-            blk_code = json_data[0]['blk_code']
-            damage_level = json_data[0]['damage_level']
-            blk_village = json_data[0]['blockage_location']['blk_village']
-            blk_tumbol = json_data[0]['blockage_location']['blk_tumbol']
-
-        text_message = TextSendMessage(
-            text='สิ่งกีดขวางลำน้ำ : {} \n ที่อยู่ {} \n ตำบล {} \n ระดับความรุนแรง {} '.format(blk_code, blk_village, blk_tumbol, damage_level))
+        num = len(json_data)
+        blk_tumbol = json_data[0]['blockage_location']['blk_tumbol']
+        message = 'สิ่งกีดขวางของตำบล{}\n'.format(blk_tumbol)
+        for i in range(num):
+            blk_code = json_data[i]['blk_code']
+            blk_village = json_data[i]['blockage_location']['blk_village']
+            river = json_data[i]['river']['river_name']+"/"+json_data[i]['river']['river_main']
+            mess = '{}. รหัสสิ่งกีดขวาง: {} \n ลำน้ำ: {} \nที่อยู่ : {} \n' .format(
+                i+1, blk_code, river, blk_village)
+            message = message+"\n"+mess
+            # text_message = TextSendMessage(text='{}. รหัสสิ่งกีดขวาง: {} \n ที่อยู่ : {} ต.{}\n' .format(i+1,blk_code,blk_village,blk_tumbol))
+            # message.append(text_message)
+        print(message)
+        text_message = TextSendMessage(text=message)
         line_bot_api.reply_message(reply_token, text_message)
 
 
